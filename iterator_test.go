@@ -175,3 +175,104 @@ func TestRange(t *testing.T) {
 	equals(t, ToSlice(Range(5, 10, -1)), []int{})
 	equals(t, ToSlice(Range(5, 10, 1)), []int{5, 6, 7, 8, 9})
 }
+
+func TestAll(t *testing.T) {
+	equals(t,
+		All(
+			Empty[int](),
+			func(n int) bool {
+				return n > 0
+			},
+		),
+		true,
+	)
+	equals(t,
+		All(
+			Slice([]int{5, 6, 7, 8, 9}),
+			func(n int) bool {
+				return n > 4
+			},
+		),
+		true,
+	)
+	equals(t,
+		All(
+			Slice([]int{1, 2, 3, 4, 5}),
+			func(n int) bool {
+				return n <= 3
+			},
+		),
+		false,
+	)
+}
+
+func TestAny(t *testing.T) {
+	equals(t,
+		Any(
+			Empty[int](),
+			func(n int) bool {
+				return n > 0
+			},
+		),
+		false,
+	)
+	equals(t,
+		Any(
+			Slice([]int{5, 6, 7, 8, 9}),
+			func(n int) bool {
+				return n > 7
+			},
+		),
+		true,
+	)
+	equals(t,
+		Any(
+			Slice([]int{1, 2, 3, 4, 5}),
+			func(n int) bool {
+				return n > 5
+			},
+		),
+		false,
+	)
+}
+
+func TestNth(t *testing.T) {
+	equals(t, Nth(Slice([]int{1, 2, 3, 4, 5}), 0).Unwrap(), 1)
+	equals(t, Nth(Slice([]int{1, 2, 3, 4, 5}), 4).Unwrap(), 5)
+	equals(t, Nth(Slice([]int{1, 2, 3, 4, 5}), 10).IsNone(), true)
+}
+
+func TestEqual(t *testing.T) {
+	equals(t, Equal(Slice([]int{}), Slice([]int{})), true)
+	equals(t, Equal(Slice([]int{1, 2, 3}), Slice([]int{1, 2, 3})), true)
+	equals(t, Equal(Slice([]int{1, 2, 3}), Slice([]int{1, 3, 2})), false)
+	equals(t, Equal(Slice([]int{1, 2, 3}), Slice([]int{1, 2})), false)
+}
+
+func TestEqualBy(t *testing.T) {
+	type Pair struct {
+		First, Second string
+	}
+	equals(
+		t,
+		EqualBy(
+			Slice([]Pair{Pair{"a", "b"}, Pair{"c", "d"}}),
+			Slice([]Pair{Pair{"a", "e"}, Pair{"c", "f"}}),
+			func(a, b Pair) bool {
+				return a.First == b.First
+			},
+		),
+		true,
+	)
+	equals(
+		t,
+		EqualBy(
+			Slice([]Pair{Pair{"a", "b"}, Pair{"c", "d"}}),
+			Slice([]Pair{Pair{"a", "e"}, Pair{"c", "f"}}),
+			func(a, b Pair) bool {
+				return a.Second == b.Second
+			},
+		),
+		false,
+	)
+}

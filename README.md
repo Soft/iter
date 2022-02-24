@@ -96,7 +96,7 @@ func Fuse[T any](it Iterator[T]) Iterator[T]
 ```
 
 `Fuse` returns an Iterator adapter that will keep yielding None after the
-underlying Iterator has first yielded None.
+underlying Iterator has yielded None once.
 
 ```go
 func Map[T, R any](it Iterator[T], fn func(T) R) Iterator[R]
@@ -150,6 +150,41 @@ func Find[T any](it Iterator[T], pred func(T) bool) Option[T]
 ```
 
 `Find` the first element from Iterator that satisfies pred predicate function.
+
+```go
+func All[T any](it Iterator[T], pred func(T) bool) bool
+```
+
+All tests if every element of the Iterator matches a predicate. An empty
+Iterator returns true.
+
+```go
+func Any[T any](it Iterator[T], pred func(T) bool) bool
+```
+
+Any tests if any element of the Iterator matches a predicate. An empty Iterator
+returns false.
+
+```go
+func Equal[T comparable](first Iterator[T], second Iterator[T]) bool
+```
+
+Determines if the elements of two Iterators are equal.
+
+```go
+func EqualBy[T any](first Iterator[T], second Iterator[T], cmp func(T, T) bool) bool
+```
+
+Determines if the elements of two Iterators are equal using function cmp to
+compare elements.
+
+```go
+func Nth[T any](it Iterator[T], n uint) Option[T]
+```
+
+Nth returns nth element of the Iterator.
+
+
 
 # Optional Values
 

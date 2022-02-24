@@ -14,14 +14,14 @@ type rangeIter struct {
 func Range(start, stop, step int) Iterator[int] {
 	return &rangeIter{
 		start: start,
-		stop: stop,
-		step: step,
-		i: 0,
+		stop:  stop,
+		step:  step,
+		i:     0,
 	}
 }
 
 func (it *rangeIter) Next() Option[int] {
-	v := it.start + it.step * it.i
+	v := it.start + it.step*it.i
 	if it.step > 0 {
 		if v >= it.stop {
 			return None[int]()
@@ -169,7 +169,7 @@ type dropIter[T any] struct {
 	drop  uint
 }
 
-// Drop returns an Iterator adapter that drops the first n items from the
+// Drop returns an Iterator adapter that drops the first n elements from the
 // underlying Iterator before yielding any values.
 func Drop[T any](it Iterator[T], n uint) Iterator[T] {
 	return &dropIter[T]{
@@ -197,7 +197,7 @@ type dropWhileIter[T any] struct {
 	done  bool
 }
 
-// DropWhile returns an Iterator adapter that drops items from the underlying
+// DropWhile returns an Iterator adapter that drops elements from the underlying
 // Iterator until pred predicate function returns true.
 func DropWhile[T any](it Iterator[T], pred func(T) bool) Iterator[T] {
 	return &dropWhileIter[T]{
@@ -239,7 +239,7 @@ func (it *repeatIter[T]) Next() Option[T] {
 	return Some(it.value)
 }
 
-// Count consumes an Iterator and returns the number of items it yielded.
+// Count consumes an Iterator and returns the number of elements it yielded.
 func Count[T any](it Iterator[T]) uint {
 	var length uint
 	v := it.Next()
@@ -317,7 +317,7 @@ type fuseIter[T any] struct {
 }
 
 // Fuse returns an Iterator adapter that will keep yielding None after the
-// underlying Iterator has first yielded None.
+// underlying Iterator has yielded None once.
 func Fuse[T any](it Iterator[T]) Iterator[T] {
 	return &fuseIter[T]{
 		inner: it,
@@ -392,5 +392,73 @@ func (it *flattenIter[T]) Next() Option[T] {
 			return None[T]()
 		}
 		it.current = next.Unwrap()
+	}
+}
+
+// All tests if every element of the Iterator matches a predicate. An empty
+// Iterator returns true.
+func All[T any](it Iterator[T], pred func(T) bool) bool {
+	v := it.Next()
+	for v.IsSome() {
+		if !pred(v.Unwrap()) {
+			return false
+		}
+		v = it.Next()
+	}
+	return true
+}
+
+// Any tests if any element of the Iterator matches a predicate. An empty
+// Iterator returns false.
+func Any[T any](it Iterator[T], pred func(T) bool) bool {
+	v := it.Next()
+	for v.IsSome() {
+		if pred(v.Unwrap()) {
+			return true
+		}
+		v = it.Next()
+	}
+	return false
+}
+
+// Nth returns nth element of the Iterator.
+func Nth[T any](it Iterator[T], n uint) Option[T] {
+	v := it.Next()
+	for n > 0 {
+		if v.IsNone() {
+			break
+		}
+		v = it.Next()
+		n--
+	}
+	return v
+}
+
+// Determines if the elements of two Iterators are equal.
+func Equal[T comparable](first Iterator[T], second Iterator[T]) bool {
+	return EqualBy(
+		first,
+		second,
+		func(a T, b T) bool {
+			return a == b
+		},
+	)
+}
+
+// Determines if the elements of two Iterators are equal using function cmp to
+// compare elements.
+func EqualBy[T any](first Iterator[T], second Iterator[T], cmp func(T, T) bool) bool {
+	for {
+		v := first.Next()
+		if v.IsNone() {
+			return second.Next().IsNone()
+		}
+		u := second.Next()
+		if u.IsNone() {
+			return false
+		}
+		if !cmp(v.Unwrap(), u.Unwrap()) {
+			return false
+		}
 	}
 }
