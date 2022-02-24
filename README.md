@@ -26,16 +26,22 @@ func Slice[T any](slice []T) Iterator[T]
 `Slice` returns an Iterator that yields elements from a slice.
 
 ```go
-func Func[T any](fn func() Option[T]) Iterator[T]
+func String(input string) Iterator[rune]
 ```
 
-`Func` returns an Iterator from a function.
+`String` returns an Iterator yielding runes from the supplied string.
 
 ```go
 func Range(start, stop, step int) Iterator[int]
 ```
 
 `Range` returns an Iterator over a range of integers.
+
+```go
+func Func[T any](fn func() Option[T]) Iterator[T]
+```
+
+`Func` returns an Iterator from a function.
 
 ```go
 func Once[T any](value T) Iterator[T]
@@ -144,6 +150,12 @@ func ToSlice[T any](it Iterator[T]) []T
 ```
 
 `ToSlice` consumes an Iterator creating a slice from the yielded values.
+
+```go
+func ToString(it Iterator[rune]) string
+```
+
+`ToString` consumes a rune Iterator creating a string.
 
 ```go
 func Find[T any](it Iterator[T], pred func(T) bool) Option[T]

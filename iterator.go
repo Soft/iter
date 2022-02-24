@@ -1,9 +1,31 @@
 package iter
 
+import "unicode/utf8"
+
 // Iterator[T] represents an iterator yielding elements of type T.
 type Iterator[T any] interface {
 	// Next yields a new value from the Iterator.
 	Next() Option[T]
+}
+
+type stringIter struct {
+	input string
+}
+
+// String returns an Iterator yielding runes from the supplied string.
+func String(input string) Iterator[rune] {
+	return &stringIter{
+		input: input,
+	}
+}
+
+func (it *stringIter) Next() Option[rune] {
+	if len(it.input) == 0 {
+		return None[rune]()
+	}
+	value, width := utf8.DecodeRuneInString(it.input)
+	it.input = it.input[width:]
+	return Some(value)
 }
 
 type rangeIter struct {
@@ -62,6 +84,11 @@ func ToSlice[T any](it Iterator[T]) []T {
 		result = append(result, v)
 	})
 	return result
+}
+
+// ToString consumes a rune Iterator creating a string.
+func ToString(it Iterator[rune]) string {
+	return string(ToSlice(it))
 }
 
 type mapIter[T, R any] struct {

@@ -276,3 +276,22 @@ func TestEqualBy(t *testing.T) {
 		false,
 	)
 }
+
+func TestString(t *testing.T) {
+	equals(
+		t,
+		Equal(
+			String("Hello"),
+			Slice([]rune{'H', 'e', 'l', 'l', 'o'}),
+		),
+		true,
+	)
+}
+
+func TestToString(t *testing.T) {
+	equals(
+		t,
+		ToString(String("Hello")),
+		"Hello",
+	)
+}
