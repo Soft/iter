@@ -167,3 +167,11 @@ func TestFlatten(t *testing.T) {
 	)
 	equals(t, ToSlice(Flatten(it)), []int{1, 2, 3, 4})
 }
+
+func TestRange(t *testing.T) {
+	equals(t, ToSlice(Range(0, 5, 1)), []int{0, 1, 2, 3, 4})
+	equals(t, ToSlice(Range(0, 0, 1)), []int{})
+	equals(t, ToSlice(Range(0, -5, -1)), []int{0, -1, -2, -3, -4})
+	equals(t, ToSlice(Range(5, 10, -1)), []int{})
+	equals(t, ToSlice(Range(5, 10, 1)), []int{5, 6, 7, 8, 9})
+}

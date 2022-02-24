@@ -23,31 +23,37 @@ type Iterator[T any] interface {
 func Slice[T any](slice []T) Iterator[T]
 ```
 
-Slice returns an Iterator that yields elements from a slice.
+`Slice` returns an Iterator that yields elements from a slice.
 
 ```go
 func Func[T any](fn func() Option[T]) Iterator[T]
 ```
 
-Func returns an Iterator from a function.
+`Func` returns an Iterator from a function.
+
+```go
+func Range(start, stop, step int) Iterator[int]
+```
+
+`Range` returns an Iterator over a range of integers.
 
 ```go
 func Once[T any](value T) Iterator[T]
 ```
 
-Once returns an Iterator that returns a value exactly once.
+`Once` returns an Iterator that returns a value exactly once.
 
 ```go
 func Empty[T any]() Iterator[T]
 ```
 
-Empty returns an empty Iterator.
+`Empty` returns an empty Iterator.
 
 ```go
 func Repeat[T any](value T) Iterator[T]
 ```
 
-Repeat returns an Iterator that repeatedly returns the same value.
+`Repeat` returns an Iterator that repeatedly returns the same value.
 
 
 ## Iterator Adapters
@@ -56,61 +62,61 @@ Repeat returns an Iterator that repeatedly returns the same value.
 func Chain[T any](first Iterator[T], second Iterator[T]) Iterator[T]
 ```
 
-Chain returns an Iterator that concatenates two iterators.
+`Chain` returns an Iterator that concatenates two iterators.
 
 ```go
 func Drop[T any](it Iterator[T], n uint) Iterator[T]
 ```
 
-Drop returns an Iterator adapter that drops the first n items from the
+`Drop` returns an Iterator adapter that drops the first n items from the
 underlying Iterator before yielding any values.
 
 ```go
 func DropWhile[T any](it Iterator[T], pred func(T) bool) Iterator[T]
 ```
 
-DropWhile returns an Iterator adapter that drops items from the underlying
+`DropWhile` returns an Iterator adapter that drops items from the underlying
 Iterator until pred predicate function returns true.
 
 ```go
 func Filter[T any](it Iterator[T], pred func(T) bool) Iterator[T]
 ```
 
-Filter returns an Iterator adapter that yields elements from the underlying
+`Filter` returns an Iterator adapter that yields elements from the underlying
 Iterator for which pred returns true.
 
 ```go
 func Flatten[T any](it Iterator[Iterator[T]]) Iterator[T]
 ```
 
-Flatten returns an Iterator adapter that flattens nested iterators.
+`Flatten` returns an Iterator adapter that flattens nested iterators.
 
 ```go
 func Fuse[T any](it Iterator[T]) Iterator[T]
 ```
 
-Fuse returns an Iterator adapter that will keep yielding None after the
+`Fuse` returns an Iterator adapter that will keep yielding None after the
 underlying Iterator has first yielded None.
 
 ```go
 func Map[T, R any](it Iterator[T], fn func(T) R) Iterator[R]
 ```
 
-Map is an Iterator adapter that transforms each value yielded by the underlying
-iterator using fn.
+`Map` is an Iterator adapter that transforms each value yielded by the
+underlying iterator using fn.
 
 ```go
 func Take[T any](it Iterator[T], n uint) Iterator[T]
 ```
 
-Take returns an Iterator adapter that yields the n first elements from the
+`Take` returns an Iterator adapter that yields the n first elements from the
 underlying Iterator.
 
 ```go
 func TakeWhile[T any](it Iterator[T], pred func(T) bool) Iterator[T]
 ```
 
-TakeWhile returns an Iterator adapter that yields values from the underlying
+`TakeWhile` returns an Iterator adapter that yields values from the underlying
 Iterator as long as pred predicate function returns true.
 
 ## Consuming Iterators

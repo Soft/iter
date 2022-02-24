@@ -6,6 +6,35 @@ type Iterator[T any] interface {
 	Next() Option[T]
 }
 
+type rangeIter struct {
+	start, stop, step, i int
+}
+
+// Range returns an Iterator over a range of integers.
+func Range(start, stop, step int) Iterator[int] {
+	return &rangeIter{
+		start: start,
+		stop: stop,
+		step: step,
+		i: 0,
+	}
+}
+
+func (it *rangeIter) Next() Option[int] {
+	v := it.start + it.step * it.i
+	if it.step > 0 {
+		if v >= it.stop {
+			return None[int]()
+		}
+	} else {
+		if v <= it.stop {
+			return None[int]()
+		}
+	}
+	it.i++
+	return Some(v)
+}
+
 type sliceIter[T any] struct {
 	slice []T
 }
