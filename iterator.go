@@ -21,11 +21,11 @@ func String(input string) Iterator[rune] {
 
 func (it *stringIter) Next() Option[rune] {
 	if len(it.input) == 0 {
-		return None[rune]()
+		return NewNone[rune]()
 	}
 	value, width := utf8.DecodeRuneInString(it.input)
 	it.input = it.input[width:]
-	return Some(value)
+	return NewSome(value)
 }
 
 type rangeIter struct {
@@ -46,15 +46,15 @@ func (it *rangeIter) Next() Option[int] {
 	v := it.start + it.step*it.i
 	if it.step > 0 {
 		if v >= it.stop {
-			return None[int]()
+			return NewNone[int]()
 		}
 	} else {
 		if v <= it.stop {
-			return None[int]()
+			return NewNone[int]()
 		}
 	}
 	it.i++
-	return Some(v)
+	return NewSome(v)
 }
 
 type sliceIter[T any] struct {
@@ -70,11 +70,11 @@ func Slice[T any](slice []T) Iterator[T] {
 
 func (it *sliceIter[T]) Next() Option[T] {
 	if len(it.slice) == 0 {
-		return None[T]()
+		return NewNone[T]()
 	}
 	first := it.slice[0]
 	it.slice = it.slice[1:]
-	return Some[T](first)
+	return NewSome[T](first)
 }
 
 // ToSlice consumes an Iterator creating a slice from the yielded values.
@@ -150,7 +150,7 @@ func Take[T any](it Iterator[T], n uint) Iterator[T] {
 
 func (it *takeIter[T]) Next() Option[T] {
 	if it.take == 0 {
-		return None[T]()
+		return NewNone[T]()
 	}
 	v := it.inner.Next()
 	if v.IsSome() {
@@ -177,7 +177,7 @@ func TakeWhile[T any](it Iterator[T], pred func(T) bool) Iterator[T] {
 
 func (it *takeWhileIter[T]) Next() Option[T] {
 	if it.done {
-		return None[T]()
+		return NewNone[T]()
 	}
 	v := it.inner.Next()
 	if v.IsNone() {
@@ -186,7 +186,7 @@ func (it *takeWhileIter[T]) Next() Option[T] {
 	}
 	if !it.pred(v.Unwrap()) {
 		it.done = true
-		return None[T]()
+		return NewNone[T]()
 	}
 	return v
 }
@@ -206,7 +206,7 @@ func Drop[T any](it Iterator[T], n uint) Iterator[T] {
 }
 
 func (it *dropIter[T]) Next() Option[T] {
-	v := None[T]()
+	v := NewNone[T]()
 	for it.drop > 0 {
 		v = it.inner.Next()
 		if v.IsNone() {
@@ -263,7 +263,7 @@ func Repeat[T any](value T) Iterator[T] {
 }
 
 func (it *repeatIter[T]) Next() Option[T] {
-	return Some(it.value)
+	return NewSome(it.value)
 }
 
 // Count consumes an Iterator and returns the number of elements it yielded.
@@ -300,7 +300,7 @@ func Empty[T any]() Iterator[T] {
 }
 
 func (it *emptyIter[T]) Next() Option[T] {
-	return None[T]()
+	return NewNone[T]()
 }
 
 type onceIter[T any] struct {
@@ -310,13 +310,13 @@ type onceIter[T any] struct {
 // Once returns an Iterator that returns a value exactly once.
 func Once[T any](value T) Iterator[T] {
 	return &onceIter[T]{
-		value: Some(value),
+		value: NewSome(value),
 	}
 }
 
 func (it *onceIter[T]) Next() Option[T] {
 	v := it.value
-	it.value = None[T]()
+	it.value = NewNone[T]()
 	return v
 }
 
@@ -354,7 +354,7 @@ func Fuse[T any](it Iterator[T]) Iterator[T] {
 
 func (it *fuseIter[T]) Next() Option[T] {
 	if it.done {
-		return None[T]()
+		return NewNone[T]()
 	}
 	v := it.inner.Next()
 	if v.IsNone() {
@@ -407,7 +407,7 @@ func Flatten[T any](it Iterator[Iterator[T]]) Iterator[T] {
 func (it *flattenIter[T]) Next() Option[T] {
 	for {
 		if it.done {
-			return None[T]()
+			return NewNone[T]()
 		}
 		v := it.current.Next()
 		if v.IsSome() {
@@ -416,7 +416,7 @@ func (it *flattenIter[T]) Next() Option[T] {
 		next := it.inner.Next()
 		if next.IsNone() {
 			it.done = true
-			return None[T]()
+			return NewNone[T]()
 		}
 		it.current = next.Unwrap()
 	}
