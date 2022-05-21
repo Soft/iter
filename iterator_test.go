@@ -44,11 +44,11 @@ func TestFunc(t *testing.T) {
 	v := 0
 	it := Func(func() Option[int] {
 		if v < 3 {
-			ret := Some(v)
+			ret := NewSome(v)
 			v++
 			return ret
 		} else {
-			return None[int]()
+			return NewNone[int]()
 		}
 	})
 	equals(t, it.Next().Unwrap(), 0)
@@ -129,9 +129,9 @@ func TestFuse(t *testing.T) {
 	state := true
 	it := Fuse(
 		Func(func() Option[int] {
-			ret := None[int]()
+			ret := NewNone[int]()
 			if state {
-				ret = Some(1)
+				ret = NewSome(1)
 			}
 			state = !state
 			return ret
@@ -155,7 +155,7 @@ func TestFind(t *testing.T) {
 	v := Find(it, func(i int) bool {
 		return i > 3
 	})
-	equals(t, v, Some(4))
+	equals(t, v, NewSome(4))
 }
 
 func TestFlatten(t *testing.T) {
