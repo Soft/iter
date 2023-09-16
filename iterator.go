@@ -1,6 +1,8 @@
 package iter
 
-import "unicode/utf8"
+import (
+	"unicode/utf8"
+)
 
 // Iterator[T] represents an iterator yielding elements of type T.
 type Iterator[T any] interface {
@@ -77,6 +79,25 @@ func (it *sliceIter[T]) Next() Option[T] {
 	return Some[T](first)
 }
 
+type chanIter[T any] struct {
+	ch <-chan T
+}
+
+// Chan returns an Iterator that yields elements written to a channel.
+func Chan[T any](ch <-chan T) Iterator[T] {
+	return &chanIter[T]{
+		ch: ch,
+	}
+}
+
+func (c *chanIter[T]) Next() Option[T] {
+	v, ok := <-c.ch
+	if !ok {
+		return None[T]()
+	}
+	return Some(v)
+}
+
 // ToSlice consumes an Iterator creating a slice from the yielded values.
 func ToSlice[T any](it Iterator[T]) []T {
 	result := []T{}
@@ -89,6 +110,22 @@ func ToSlice[T any](it Iterator[T]) []T {
 // ToString consumes a rune Iterator creating a string.
 func ToString(it Iterator[rune]) string {
 	return string(ToSlice(it))
+}
+
+// ToChan consumes an Iterator writing yielded values to the returned channel.
+func ToChan[T any](it Iterator[T]) <-chan T {
+	ch := make(chan T)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+			}
+		}()
+		ForEach(it, func(v T) {
+			ch <- v
+		})
+		close(ch)
+	}()
+	return ch
 }
 
 type mapIter[T, R any] struct {
