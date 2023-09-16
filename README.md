@@ -26,6 +26,12 @@ func Slice[T any](slice []T) Iterator[T]
 `Slice` returns an Iterator that yields elements from a slice.
 
 ```go
+func Chan[T any](ch <-chan T) Iterator[T]
+```
+
+`Chan` returns an Iterator that yields elements from a channel.
+
+```go
 func String(input string) Iterator[rune]
 ```
 
@@ -150,6 +156,12 @@ func ToSlice[T any](it Iterator[T]) []T
 ```
 
 `ToSlice` consumes an Iterator creating a slice from the yielded values.
+
+```go
+func ToChan[T any](it Iterator[T]) <-chan T
+```
+
+`ToChan` consumes an Iterator writing the yielded values to a channel.
 
 ```go
 func ToString(it Iterator[rune]) string

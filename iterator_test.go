@@ -19,6 +19,22 @@ func TestSlice(t *testing.T) {
 	equals(t, it.Next().IsNone(), true)
 }
 
+func TestChan(t *testing.T) {
+	ch := make(chan int)
+	arr := []int{1, 2, 3}
+	go func() {
+		for _, v := range arr {
+			ch <- v
+		}
+		close(ch)
+	}()
+	it := Chan(ch)
+	equals(t, it.Next().Unwrap(), 1)
+	equals(t, it.Next().Unwrap(), 2)
+	equals(t, it.Next().Unwrap(), 3)
+	equals(t, it.Next().IsNone(), true)
+}
+
 func TestRepeat(t *testing.T) {
 	it := Repeat(5)
 	equals(t, it.Next().Unwrap(), 5)
@@ -72,6 +88,13 @@ func TestToSlice(t *testing.T) {
 	slice1 := ToSlice(Take(Repeat(5), 3))
 	equals(t, slice1, []int{5, 5, 5})
 	slice2 := ToSlice(Empty[int]())
+	equals(t, slice2, []int{})
+}
+
+func TestToChan(t *testing.T) {
+	slice1 := ToSlice(Chan(ToChan(Take(Repeat(5), 3))))
+	equals(t, slice1, []int{5, 5, 5})
+	slice2 := ToSlice(Chan(ToChan(Empty[int]())))
 	equals(t, slice2, []int{})
 }
 
